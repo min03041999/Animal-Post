@@ -3,14 +3,47 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const multer = require("multer");
 
-require("dotenv").config();
-const app = express();
 const feedRoutes = require("./routes/feed");
+const authRoutes = require("./routes/auth");
 
-app.use(bodyParser.json());
+const app = express();
+require("dotenv").config();
 
-app.use("/feed", feedRoutes);
+const { v4: uuid } = require("uuid");
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+    // cb(null, path.join(__dirname, "images"));
+  },
+  filename: (req, file, cb) => {
+    // Error character as . / - ....
+    // cb(null, new Date().toISOString() + "-" + file.originalname);
+    // cb(null, Date.now() + path.extname(file.originalname));
+    cb(null, uuid() + path.extname(file.originalname));
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg"
+  ) {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+
+// app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
+app.use(bodyParser.json()); // application/json
+// app.use(express.json({ limit: "25mb" }));
+app.use(
+  multer({ storage: fileStorage, fileFilter: fileFilter }).single("image")
+);
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // Getting Request
 app.get("/", (req, res) => {
@@ -31,8 +64,11 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/feed", feedRoutes);
+app.use("/auth", authRoutes);
+
 // Establishing the port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 // Executing the server on given port number
 
