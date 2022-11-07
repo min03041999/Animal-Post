@@ -4,6 +4,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 
+require("dotenv").config();
 const app = express();
 const feedRoutes = require("./routes/feed");
 
@@ -36,9 +37,7 @@ const PORT = process.env.PORT || 5000;
 // Executing the server on given port number
 
 mongoose
-  .connect(
-    "mongodb+srv://mongo-user:min03041999@cluster-mongo-test.w8oqhwn.mongodb.net/messages?retryWrites=true&w=majority"
-  )
+  .connect(process.env.MONGODB_URI)
   .then((result) => {
     app.listen(PORT, console.log(`Server started on port ${PORT}`));
   })
