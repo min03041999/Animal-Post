@@ -46,7 +46,7 @@ app.use(
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 // Getting Request
-app.post("/", (req, res) => {
+app.get("/", (req, res) => {
   // Sending the response
   res.send("Hello World!");
 
